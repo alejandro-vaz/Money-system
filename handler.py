@@ -41,7 +41,7 @@ def decrypt(password, file):
             with open(file, "x") as file:
                 encrypt("[]", password, "./data/assets.json.enc")
             return "[]"
-    key = (password.encode('utf-8') + b'\0' * 32)[:32]  # Rellenar o truncar la clave
+    key = (password.encode('utf-8') + b'\0' * 32)[:32]
     cipher = AES.new(key, AES.MODE_ECB)
     encrypted_data = base64.b64decode(encrypted_data)
     decrypted = unpad(cipher.decrypt(encrypted_data), AES.block_size).decode('utf-8')
