@@ -1,48 +1,50 @@
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import base64
+import os
+import secrets
+import hashlib
+from Crypto.Protocol.KDF import PBKDF2
 
-# Función para encriptar
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+# Function to encrypt data
 def encrypt(data, password, file):
-    # Asegúrate de que la longitud de la clave sea de 16, 24 o 32 bytes
-    key = (password.encode('utf-8') + b'\0' * 32)[:32]  # Rellenar o truncar la clave
-    cipher = AES.new(key, AES.MODE_ECB)
-    encrypted = cipher.encrypt(pad(data.encode('utf-8'), AES.block_size))
-    transformed = base64.b64encode(encrypted).decode('utf-8')
-    with open(file, "w") as file:
-        file.write(transformed)
+    salt = secrets.token_bytes(16)
+    key = PBKDF2(password, salt, dkLen=32, count=100000)
+    iv = secrets.token_bytes(AES.block_size)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    encrypted_data = cipher.encrypt(pad(data.encode('utf-8'), AES.block_size))
+    encoded_data = base64.b64encode(salt + iv + encrypted_data).decode('utf-8')
+    
+    with open(file, "w") as f:
+        f.write(encoded_data)
 
-
-# Función para desencriptar
+# Function to decrypt data
 def decrypt(password, file):
-    if file == "./data/user.txt.enc":
-        try:
-            with open(file, "r") as file:
-                encrypted_data = file.read()
-        except FileNotFoundError:
-            with open(file, "x") as file:
-                content = f"""0:0:0:0:0:0
-0"""
-                encrypt(content, password, "./data/user.txt.enc")
-            return content
-    if file == "./data/transactions.json.enc":
-        try:
-            with open(file, "r") as file:
-                encrypted_data = file.read()
-        except FileNotFoundError:
-            with open(file, "x") as file:
-                encrypt("[]", password, "./data/transactions.json.enc")
-            return "[]"
-    if file == "./data/assets.json.enc":
-        try:
-            with open(file, "r") as file:
-                encrypted_data = file.read()
-        except FileNotFoundError:
-            with open(file, "x") as file:
-                encrypt("[]", password, "./data/assets.json.enc")
-            return "[]"
-    key = (password.encode('utf-8') + b'\0' * 32)[:32]
-    cipher = AES.new(key, AES.MODE_ECB)
-    encrypted_data = base64.b64decode(encrypted_data)
-    decrypted = unpad(cipher.decrypt(encrypted_data), AES.block_size).decode('utf-8')
-    return decrypted
+    default_content = {
+        "./data/user.txt.enc": "0:0:0:0:0:0\n0",
+        "./data/transactions.json.enc": "[]",
+        "./data/assets.json.enc": "[]"
+    }
+
+    if file in default_content:
+        if not os.path.exists(file):
+            encrypt(default_content[file], password, file)
+            return default_content[file]
+
+    try:
+        with open(file, "r") as f:
+            encrypted_data = f.read()
+    except FileNotFoundError:
+        pass
+
+    # Decrypt the data
+    decoded_data = base64.b64decode(encrypted_data)
+    salt = decoded_data[:16]
+    iv = decoded_data[16:32]
+    key = PBKDF2(password, salt, dkLen=32, count=100000)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    decrypted_data = unpad(cipher.decrypt(decoded_data[32:]), AES.block_size).decode('utf-8')
+    
+    return decrypted_data

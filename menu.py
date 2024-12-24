@@ -1,7 +1,10 @@
 from colorama import init, Fore, Style, Cursor
 import os
 import time
+
+
 init(autoreset=True)
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def say(text, color):
     color = color.upper()
@@ -29,7 +32,7 @@ def ask(question, color):
         "RED": Fore.RED,
         "GREEN": Fore.GREEN,
         "YELLOW": Fore.YELLOW,
-        "CYAN": Fore.BLUE,
+        "BLUE": Fore.BLUE,
         "MAGENTA": Fore.MAGENTA,
         "CYAN": Fore.CYAN,
         "WHITE": Fore.WHITE
@@ -39,39 +42,35 @@ def ask(question, color):
     else:
         return input(question)
 
-def move(right, down):
-    print(Cursor.POS(right, down), end="")
-
 def start(duration):
-    os.system("cls")
-    content = f"""{"="*120}
+    os.system("clear")
+    content = f"""{"="*211}
     WELCOME
-{"="*120}
+{"="*211}
     
     Loading Money System...
     
     """
     say(content, "CYAN")
-    move(5, 7)
     time.sleep(duration)
 
 def login():
-    os.system("cls")
-    content = f"""{"="*120}
+    os.system("clear")
+    content = f"""{"="*211}
     LOGIN
-{"="*120}
+{"="*211}
     
-    If it's your first time logging in the system, choose a password to encrypt the files.
+    If it's your first time logging in, choose a password to encrypt the files.
     
     Enter your password: """
     
     return ask(content, "CYAN")
 
-def main(show):
-    os.system("cls")
-    content = f"""{"="*120}
-    MONEY SYSTEM
-{"="*120}
+def main(show, title):
+    os.system("clear")
+    content = f"""{"="*211}
+    {title}
+{"="*211}
     {show}
     > """
     

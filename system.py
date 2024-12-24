@@ -1,4 +1,7 @@
 import math
+import os
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def sumoflist(list):
     count = 0
@@ -20,7 +23,10 @@ def listfloattostr(elements):
 
 def calculate(tax_rate, amount, accounts):
     def calcprop_in(n):
-        n = math.log10(n)
+        try:
+            n = math.log10(n)
+        except:
+            return 1
         if n < 0:
             return 1
         if 0 <= n < 6:
@@ -30,7 +36,10 @@ def calculate(tax_rate, amount, accounts):
         return 0.05
 
     def calcprop_sp(n):
-        n = math.log10(n)
+        try:
+            n = math.log10(n)
+        except:
+            return 0
         if n < 0:
             return 0
         if 0 <= n < 2:
@@ -44,7 +53,10 @@ def calculate(tax_rate, amount, accounts):
         return 0.05
 
     def calcprop_li(n):
-        n = math.log10(n)
+        try:
+            n = math.log10(n)
+        except:
+            return 0
         if n < 2:
             return 0
         if 2 <= n < 3:
@@ -62,7 +74,10 @@ def calculate(tax_rate, amount, accounts):
         return 0.05
 
     def calcprop_mp(n):
-        n = math.log10(n)
+        try:
+            n = math.log10(n)
+        except:
+            return 0
         if n < 4:
             return 0
         if 4 <= n < 5:
@@ -75,7 +90,10 @@ def calculate(tax_rate, amount, accounts):
             return 0.65 + 0.1 * (n - 7)
         return 0.85
     
-    tax_money = tax_rate * amount
+    if amount > 0:
+        tax_money = tax_rate * amount
+    else:
+        tax_money = 0
     usable = amount - tax_money
     return [
         calcprop_in(sumoflist(accounts) + amount) * usable,
