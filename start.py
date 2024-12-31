@@ -9,6 +9,7 @@ print("\033[?25l", end="")
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 os.system("clear")
 os.system("xdotool key F11")
+os.system("autohotkey")
 
 def load():
     accounts = handler.decrypt(password, "./data/user.txt.enc").splitlines()[0].split(":")
